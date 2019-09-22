@@ -4,6 +4,7 @@
   width: 10.5%;
   border: .5px solid silver;
   position: absolute;
+  z-index: 1;
 }
 
 /* 
