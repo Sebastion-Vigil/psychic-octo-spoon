@@ -77,7 +77,7 @@ class Game extends React.Component {
 
   toggleHelpButton = () => {
     const toggled = !this.state.cheat;
-    console.log(this.state);    
+    console.log("state from toggle: ", this.state);    
     this.setState({
       cheat: toggled,
     });
@@ -86,8 +86,8 @@ class Game extends React.Component {
   randomTileGenerator = () => {
     const width = 10.5; // tile width  
     const height = 8.5; // tile height
-    const xSpace = .4 // horizontal space between tiles
-    const ySpace = 1 // vertical space between tiles
+    const xSpace = .4; // horizontal space between tiles
+    const ySpace = 1; // vertical space between tiles
     let l = 6.5;
     let t = 71.5;
     const randomIs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
@@ -127,12 +127,21 @@ class Game extends React.Component {
   }
 
   componentDidMount() {
+    console.log("cursor props from componentDidMount(): ", this.props);
     this.setState({
       tileTimer: setInterval(() => {
+        console.log("in the loop!");
         const rIs = this.state.randomIs;
         let i = this.randTileIndex(0, rIs.length - 1);
         let rendered = this.state.renderedTiles;
-        rendered.push(this.state.styleStore[rIs[i]])
+        if (rendered.length === 23) {
+          console.log("no more timer!!");
+          clearInterval(this.state.tileTimer);
+        }
+        if (rendered.length === 23) {
+          console.log("but we're still gonna complete the rest of the code!");
+        }
+        rendered.push(this.state.styleStore[rIs[i]]);
         if (rIs.length > 1) {
           rIs.splice(i, 1);
         }
@@ -146,12 +155,8 @@ class Game extends React.Component {
     })
   }
 
-  componentDidUpdate() {
-    if (this.state.renderedTiles.length === 24 && this.state.timer) {
-      clearInterval(this.state.timer);
-      console.log("clearingInterval!!!");
-    }
-  }
+  // componentDidUpdate() {
+  // }
 
   flirtingWithProps = () => {
     const miAmor = this.props;
@@ -163,6 +168,44 @@ class Game extends React.Component {
     console.log('In all her beauty: ', miAmor);
   };
 
+  getTileIndex = (i) => {
+    console.log("getTileIndex i: ", i);
+    return this.state.renderedTiles.indexOf(i);
+  }
+
+  handleDragStart = (style) => {
+    this.setState({
+      timer: setInterval(() => {
+        const s = style;
+        const rendered = JSON.parse(JSON.stringify(this.state.renderedTiles));
+        console.log("s: ", s);
+        const tileIndex = this.getTileIndex(s);
+        console.log("tileIndex: ", tileIndex);
+        const dragged = rendered[tileIndex];
+        const cursorInfo = this.props;
+        const x = ((100 * cursorInfo.position.x) / window.innerWidth).toString() + 'vw';
+        const y = ((100 * cursorInfo.position.y) / window.innerHeight).toString() + 'vh';
+        dragged.left = x;
+        dragged.top = y;
+        rendered[tileIndex] = dragged;
+        this.setState({
+          renderedTiles: rendered
+        });
+      }, 10)
+    }) 
+  }
+
+  handleDragEnd = (s) => {
+    const rendered = JSON.parse(JSON.stringify(this.state.renderedTiles));
+    const tileIndex = this.getTileIndex(s);
+    const endPos = rendered[tileIndex];
+    rendered[tileIndex] = endPos;
+    clearInterval(this.state.timer);
+    this.setState({
+      renderedTiles: rendered
+    })
+  }
+
   render() {
     const screen = this.state.cheat
       ? this.state.screens[1]
@@ -171,7 +214,14 @@ class Game extends React.Component {
       <div className="game">
         {
           this.state.renderedTiles.map((s, i) => {
-            return <Tile key={i} style={s} />
+            return <Tile 
+              key={i} 
+              style={s} 
+              rendered={this.state.renderedTiles}
+              gameProps={this.props}
+              startDrag={() => this.handleDragStart(s)}
+              endDrag={() => this.handleDragEnd(s)}
+            />
           })
         }
         {screen}

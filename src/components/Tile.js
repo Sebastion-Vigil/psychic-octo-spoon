@@ -3,18 +3,14 @@ import React from 'react';
 import '../css/Tile.css';
 
 class Tile extends React.Component {
-  
-  test = () => {
-    console.log(this.props);
-  }
 
   render() {
     return <div 
       className="tile" 
       style={this.props.style}
       draggable="true"
-      onDragStart={this.test}
-      onDragEnd={this.test}
+      onDragStart={this.props.startDrag}
+      onDragEnd={this.props.endDrag}
     />
   }
 }
