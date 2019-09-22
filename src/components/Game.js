@@ -168,26 +168,32 @@ class Game extends React.Component {
     console.log('In all her beauty: ', miAmor);
   };
 
-  getTileIndex = (i) => {
-    console.log("getTileIndex i: ", i);
-    return this.state.renderedTiles.indexOf(i);
-  }
-
   handleDragStart = (style) => {
     this.setState({
-      timer: setInterval(() => {
+      dragTimer: setInterval(() => {
+        console.log("upper style parameter: ", style);
+        console.log("props: ", this.props);
         const s = style;
         const rendered = JSON.parse(JSON.stringify(this.state.renderedTiles));
+        console.log("rendered: ", rendered);
         console.log("s: ", s);
-        const tileIndex = this.getTileIndex(s);
+        const img = s.backgroundImage;
+        const tileIndex = rendered.findIndex(x => x.backgroundImage === img);
         console.log("tileIndex: ", tileIndex);
         const dragged = rendered[tileIndex];
+        console.log("dragged: ", dragged);
         const cursorInfo = this.props;
+        console.log("cursorInfo: ", cursorInfo);
+        console.log("window.innerWidth: ", window.innerWidth);
+        console.log("window.innerHeight: ", window.innerHeight);
         const x = ((100 * cursorInfo.position.x) / window.innerWidth).toString() + 'vw';
         const y = ((100 * cursorInfo.position.y) / window.innerHeight).toString() + 'vh';
+        console.log("x, y: ", x, y);
         dragged.left = x;
         dragged.top = y;
+        console.log("dragged: ", dragged);
         rendered[tileIndex] = dragged;
+        console.log("rendered after change: ", rendered);
         this.setState({
           renderedTiles: rendered
         });
@@ -195,15 +201,9 @@ class Game extends React.Component {
     }) 
   }
 
-  handleDragEnd = (s) => {
-    const rendered = JSON.parse(JSON.stringify(this.state.renderedTiles));
-    const tileIndex = this.getTileIndex(s);
-    const endPos = rendered[tileIndex];
-    rendered[tileIndex] = endPos;
-    clearInterval(this.state.timer);
-    this.setState({
-      renderedTiles: rendered
-    })
+  handleDragEnd = () => {
+    console.log("drag stopped!");
+    clearInterval(this.state.dragTimer);
   }
 
   render() {
@@ -220,7 +220,7 @@ class Game extends React.Component {
               rendered={this.state.renderedTiles}
               gameProps={this.props}
               startDrag={() => this.handleDragStart(s)}
-              endDrag={() => this.handleDragEnd(s)}
+              endDrag={() => this.handleDragEnd()}
             />
           })
         }
